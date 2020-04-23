@@ -46,6 +46,14 @@ class GameWindow < Gosu::Window
     case id
     when Gosu::MsLeft
 
+  def CheckPlayerTurn(playerTurn, button)
+    case playerTurn
+    when "O"
+      @board[button] = "O"
+      playerTurn = "X"
+    when "X"
+      @board[button] = "X"
+      playerTurn = "O"
     end
   end
 end
