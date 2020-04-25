@@ -14,9 +14,13 @@ class GameWindow < Gosu::Window
 
     # Player's Turn
     @playerTurn = "O"
+    # Image of "O"
     @nought = Gosu::Image.new("media/nought.png")
+    # Image of "X"
     @cross = Gosu::Image.new("media/cross.png")
+    # Game condition
     @isGameEnd = false
+    # Game board
     @board = ["-", "-", "-",
               "-", "-", "-",
               "-", "-", "-"]
@@ -25,72 +29,44 @@ class GameWindow < Gosu::Window
     @buttonPos = [[200, 95],[280, 95],[360, 95],
                   [200, 175],[280, 175],[360, 175],
                   [200, 255],[280, 255],[360, 255]]
-    
+    # Button width
     @buttonWidth = 80
   end
 
   def draw
+    # Game board
     draw_rect(200, 95, 240, 240, Gosu::Color::RED, ZOrder::BOTTOM)
-
     draw_line(200, 176, Gosu::Color::BLACK, 440, 176, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
     draw_line(200, 256, Gosu::Color::BLACK, 440, 256, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
     draw_line(281, 95, Gosu::Color::BLACK, 281, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
     draw_line(361, 95, Gosu::Color::BLACK, 361, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
 
-    if @board[0] == "O"
-      @nought.draw(@buttonPos[0][0], @buttonPos[0][1], ZOrder::TOP)
-    elsif @board[0] == "X"
-      @cross.draw(@buttonPos[0][0], @buttonPos[0][1], ZOrder::TOP)
-    end
+    # check board[0] then draw in row 1 col 1
+    CheckAndDraw(0)
 
-    if @board[1] == "O"
-      @nought.draw(@buttonPos[1][0], @buttonPos[1][1], ZOrder::TOP)
-    elsif @board[1] == "X"
-      @cross.draw(@buttonPos[1][0], @buttonPos[1][1], ZOrder::TOP)
-    end
+    # check board[1] then draw in row 1 col 2
+    CheckAndDraw(1)
 
-    if @board[2] == "O"
-      @nought.draw(@buttonPos[2][0], @buttonPos[2][1], ZOrder::TOP)
-    elsif @board[2] == "X"
-      @cross.draw(@buttonPos[2][0], @buttonPos[2][1], ZOrder::TOP)
-    end
+    # check board[2] then draw in row 1 col 3
+    CheckAndDraw(2)
 
-    if @board[3] == "O"
-      @nought.draw(@buttonPos[3][0], @buttonPos[3][1], ZOrder::TOP)
-    elsif @board[3] == "X"
-      @cross.draw(@buttonPos[3][0], @buttonPos[3][1], ZOrder::TOP)
-    end
+    # check board[3] then draw in row 2 col 1
+    CheckAndDraw(3)
 
-    if @board[4] == "O"
-      @nought.draw(@buttonPos[4][0], @buttonPos[4][1], ZOrder::TOP)
-    elsif @board[4] == "X"
-      @cross.draw(@buttonPos[4][0], @buttonPos[4][1], ZOrder::TOP)
-    end
+    # check board[4] then draw in row 2 col 2
+    CheckAndDraw(4)
 
-    if @board[5] == "O"
-      @nought.draw(@buttonPos[5][0], @buttonPos[5][1], ZOrder::TOP)
-    elsif @board[5] == "X"
-      @cross.draw(@buttonPos[5][0], @buttonPos[5][1], ZOrder::TOP)
-    end
+    # check board[5] then draw in row 2 col 3
+    CheckAndDraw(5)
 
-    if @board[6] == "O"
-      @nought.draw(@buttonPos[6][0], @buttonPos[6][1], ZOrder::TOP)
-    elsif @board[6] == "X"
-      @cross.draw(@buttonPos[6][0], @buttonPos[6][1], ZOrder::TOP)
-    end
+    # check board[6] then draw in row 3 col 1
+    CheckAndDraw(6)
 
-    if @board[7] == "O"
-      @nought.draw(@buttonPos[7][0], @buttonPos[7][1], ZOrder::TOP)
-    elsif @board[7] == "X"
-      @cross.draw(@buttonPos[7][0], @buttonPos[7][1], ZOrder::TOP)
-    end
+    # check board[7] then draw in row 3 col 2
+    CheckAndDraw(7)
 
-    if @board[8] == "O"
-      @nought.draw(@buttonPos[8][0], @buttonPos[8][1], ZOrder::TOP)
-    elsif @board[8] == "X"
-      @cross.draw(@buttonPos[8][0], @buttonPos[8][1], ZOrder::TOP)
-    end
-
+    # check board[8] then draw in row 3 col 3
+    CheckAndDraw(8)
   end
 
   def update
@@ -167,6 +143,14 @@ class GameWindow < Gosu::Window
         end
       end
 
+    end
+  end
+
+  def CheckAndDraw(i)
+    if @board[i] == "O"
+      @nought.draw(@buttonPos[i][0], @buttonPos[i][1], ZOrder::TOP)
+    elsif @board[i] == "X"
+      @cross.draw(@buttonPos[i][0], @buttonPos[i][1], ZOrder::TOP)
     end
   end
 
