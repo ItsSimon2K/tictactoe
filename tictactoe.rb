@@ -146,11 +146,12 @@ class GameWindow < Gosu::Window
     end
   end
 
-  def CheckAndDraw(i)
-    if @board[i] == "O"
-      @nought.draw(@buttonPos[i][0], @buttonPos[i][1], ZOrder::TOP)
-    elsif @board[i] == "X"
-      @cross.draw(@buttonPos[i][0], @buttonPos[i][1], ZOrder::TOP)
+  def CheckAndDraw(button)
+    case @board[button]
+    when "O"
+      @nought.draw(@buttonPos[button][0], @buttonPos[button][1], ZOrder::TOP)
+    when "X"
+      @cross.draw(@buttonPos[button][0], @buttonPos[button][1], ZOrder::TOP)
     end
   end
 
