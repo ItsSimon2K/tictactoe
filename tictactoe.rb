@@ -81,68 +81,76 @@ class GameWindow < Gosu::Window
     case id
     when Gosu::MsLeft
       # Row 1 Col 1
-      if ((mouse_x > @buttonPos[0][0] and mouse_x < @buttonPos[0][0] + @buttonWidth) and (mouse_y > @buttonPos[0][1] and mouse_y < @buttonPos[0][1] + @buttonWidth))
+      if mouse_over_button?(mouse_x, mouse_y, 0, 0, 1)
         if @board[0] != "O" and  @board[0] != "X"
-          @playerTurn = CheckPlayerTurn(@playerTurn, 0)
+          @playerTurn = Handle_Turn(@playerTurn, 0)
         end
       end
 
       # Row 1 Col 2
-      if ((mouse_x > @buttonPos[1][0] and mouse_x < @buttonPos[1][0] + @buttonWidth) and (mouse_y > @buttonPos[1][1] and mouse_y < @buttonPos[1][1] + @buttonWidth))
+      if mouse_over_button?(mouse_x, mouse_y, 1, 0, 1)
         if @board[1] != "O" and @board[1] !=  "X"
-          @playerTurn = CheckPlayerTurn(@playerTurn, 1)
+          @playerTurn = Handle_Turn(@playerTurn, 1)
         end
       end
 
       # Row 1 Col 3
-      if ((mouse_x > @buttonPos[2][0] and mouse_x < @buttonPos[2][0] + @buttonWidth) and (mouse_y > @buttonPos[2][1] and mouse_y < @buttonPos[2][1] + @buttonWidth))
+      if mouse_over_button?(mouse_x, mouse_y, 2, 0, 1)
         if @board[2] != "O" and @board[2] !=  "X"
-          @playerTurn = CheckPlayerTurn(@playerTurn, 2)
+          @playerTurn = Handle_Turn(@playerTurn, 2)
         end
       end
 
       # Row 2 Col 1
-      if ((mouse_x > @buttonPos[3][0] and mouse_x < @buttonPos[3][0] + @buttonWidth) and (mouse_y > @buttonPos[3][1] and mouse_y < @buttonPos[3][1] + @buttonWidth))
+      if mouse_over_button?(mouse_x, mouse_y, 3, 0, 1)
         if @board[3] != "O" and @board[3] !=  "X"
-          @playerTurn = CheckPlayerTurn(@playerTurn, 3)
+          @playerTurn = Handle_Turn(@playerTurn, 3)
         end
       end
 
       # Row 2 Col 2
-      if ((mouse_x > @buttonPos[4][0] and mouse_x < @buttonPos[4][0] + @buttonWidth) and (mouse_y > @buttonPos[4][1] and mouse_y < @buttonPos[4][1] + @buttonWidth))
+      if mouse_over_button?(mouse_x, mouse_y, 4, 0, 1)
         if @board[4] != "O" and @board[4] !=  "X"
-          @playerTurn = CheckPlayerTurn(@playerTurn, 4)
+          @playerTurn = Handle_Turn(@playerTurn, 4)
         end
       end
 
       # Row 2 Col 3
-      if ((mouse_x > @buttonPos[5][0] and mouse_x < @buttonPos[5][0] + @buttonWidth) and (mouse_y > @buttonPos[5][1] and mouse_y < @buttonPos[5][1] + @buttonWidth))
+      if mouse_over_button?(mouse_x, mouse_y, 5, 0, 1)
         if @board[5] != "O" and @board[5] !=  "X"
-          @playerTurn = CheckPlayerTurn(@playerTurn, 5)
+          @playerTurn = Handle_Turn(@playerTurn, 5)
         end
       end
 
       # Row 3 Col 1
-      if ((mouse_x > @buttonPos[6][0] and mouse_x < @buttonPos[6][0] + @buttonWidth) and (mouse_y > @buttonPos[6][1] and mouse_y < @buttonPos[6][1] + @buttonWidth))
+      if mouse_over_button?(mouse_x, mouse_y, 6, 0, 1)
         if @board[6] != "O" and @board[6] !=  "X"
-          @playerTurn = CheckPlayerTurn(@playerTurn, 6)
+          @playerTurn = Handle_Turn(@playerTurn, 6)
         end
       end
 
       # Row 3 Col 2
-      if ((mouse_x > @buttonPos[7][0] and mouse_x < @buttonPos[7][0] + @buttonWidth) and (mouse_y > @buttonPos[7][1] and mouse_y < @buttonPos[7][1] + @buttonWidth))
+      if mouse_over_button?(mouse_x, mouse_y, 7, 0, 1)
         if @board[7] != "O" and @board[7] !=  "X"
-          @playerTurn = CheckPlayerTurn(@playerTurn, 7)
+          @playerTurn = Handle_Turn(@playerTurn, 7)
         end
       end
 
       # Row 3 Col 3
-      if ((mouse_x > @buttonPos[8][0] and mouse_x < @buttonPos[8][0] + @buttonWidth) and (mouse_y > @buttonPos[8][1] and mouse_y < @buttonPos[8][1] + @buttonWidth)) 
+      if mouse_over_button?(mouse_x, mouse_y, 8, 0, 1)
         if @board[8] != "O" and @board[8] !=  "X"
-          @playerTurn = CheckPlayerTurn(@playerTurn, 8)
+          @playerTurn = Handle_Turn(@playerTurn, 8)
         end
       end
 
+    end
+  end
+
+  def mouse_over_button?(mouse_x, mouse_y, button, button_x, button_y)
+    if ((mouse_x > @buttonPos[button][button_x] and mouse_x < @buttonPos[button][button_x] + @buttonWidth) and (mouse_y > @buttonPos[button][button_y] and mouse_y < @buttonPos[button][button_y] + @buttonWidth)) 
+      true
+    else
+      false
     end
   end
 
@@ -155,14 +163,27 @@ class GameWindow < Gosu::Window
     end
   end
 
-  def CheckPlayerTurn(playerTurn, button)
+  def Handle_Turn(playerTurn, button)
+    PlaceSign(playerTurn,button)
+    SwitchPlayerTurn(playerTurn)
+  end
+
+  def SwitchPlayerTurn(playerTurn)
+    case playerTurn
+    when "O"
+      playerTurn = "X"
+    when "X"
+      playerTurn = "O"
+    end
+    return playerTurn
+  end
+
+  def PlaceSign(playerTurn, button)
     case playerTurn
     when "O"
       @board[button] = "O"
-      playerTurn = "X"
     when "X"
       @board[button] = "X"
-      playerTurn = "O"
     end
   end
 end
