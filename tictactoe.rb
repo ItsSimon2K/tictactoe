@@ -11,7 +11,7 @@ class TicTacToe < Gosu::Window
 
   def initialize
     super(WIN_WIDTH, WIN_HEIGHT, false)
-
+    @displayTurn = Gosu::Font.new(50)
     # Player's Turn
     @playerTurn = "O"
     # Image of "O"
@@ -19,7 +19,7 @@ class TicTacToe < Gosu::Window
     # Image of "X"
     @cross = Gosu::Image.new("media/cross.png")
     # Game condition
-    @isGameEnd = false
+    @game = true
     # Game board
     @board = ["", "", "",
               "", "", "",
@@ -34,6 +34,9 @@ class TicTacToe < Gosu::Window
   end
 
   def draw
+    # Display player's turn
+    @displayTurn.draw_text((@playerTurn + "\'s Turn"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+
     # Game board
     draw_rect(200, 95, 240, 240, Gosu::Color::RED, ZOrder::BOTTOM)
     draw_line(200, 176, Gosu::Color::BLACK, 440, 176, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
@@ -44,6 +47,7 @@ class TicTacToe < Gosu::Window
     for i in 0..8
       CheckAndDraw(i)
     end
+
   end
 
   def update
@@ -57,6 +61,7 @@ class TicTacToe < Gosu::Window
   def button_down(id)
     case id
     when Gosu::MsLeft
+
       for i in 0..8
         if mouse_over_button?(mouse_x, mouse_y, i, 0, 1)
           if @board[i] != "O" and  @board[i] != "X"
@@ -64,6 +69,7 @@ class TicTacToe < Gosu::Window
           end
         end
       end
+      
     end
   end
 
