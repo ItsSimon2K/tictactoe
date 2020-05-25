@@ -54,10 +54,10 @@ class TicTacToe < Gosu::Window
     end
 
     if (!@game)
-      if @winner != ""
+      if @winner == "X" or @winner == "O"
         # Display winner when the game ends and theres no tie
         @text.draw((@winner + " Won!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
-      else
+      elsif @winner == ""
         @text.draw(("It's a tie!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
       end
 
@@ -157,6 +157,11 @@ class TicTacToe < Gosu::Window
       @winner = verticalwinner
     elsif horizontalwinner
       @winner = horizontalwinner
+    else
+      if !(@board.include? "")
+        @winner = ""
+        @game = false
+      end
     end
   end
 
