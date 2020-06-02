@@ -7,11 +7,42 @@ end
 WIN_WIDTH = 640
 WIN_HEIGHT = 400
 
+class Button
+  attr_accessor :button_x, :button_y, :button_width, :button_height, :button_color, :button_zorder, :text, :text_content, :text_color, :text_zorder
+
+  def initialize(button_x, button_y, button_width, button_height, button_color, button_zorder, text, text_content, text_color, text_zorder)
+    @button_x = button_x
+    @button_y = button_y
+    @button_width = button_width
+    @button_height = button_height
+    @button_color = button_color
+    @button_zorder = button_zorder
+    @text = text
+    @text_content = text_content
+    @text_color = text_color
+    @text_zorder = text_zorder
+  end
+
+  def draw
+    Gosu.draw_rect(@button_x, @button_y, @button_width, @button_height, @button_color, @button_zorder)
+    @text.draw_text(@text_content, @button_x + (@button_width / 8), @button_y + (@button_height / 4), @text_zorder, 1, 1, @text_color, mode=:default)
+  end
+
+  def mouse_over_button?(mouse_x, mouse_y)
+    if ((mouse_x > @button_x and mouse_x < @button_x + @button_width) and (mouse_y > @button_y and mouse_y < @button_y + @button_height)) 
+      true
+    else
+      false
+    end
+  end
+end
+
 class TicTacToe < Gosu::Window
 
   def initialize
     super(WIN_WIDTH, WIN_HEIGHT, false)
     @text = Gosu::Font.new(50)
+    @button_text = Gosu::Font.new(25)
     # Player's Turn
     @player_turn = "O"
     # Winner
@@ -30,8 +61,11 @@ class TicTacToe < Gosu::Window
     @button_pos = [[200, 95],[280, 95],[360, 95],
                   [200, 175],[280, 175],[360, 175],
                   [200, 255],[280, 255],[360, 255]]
-    # Button width
-    @buttonWidth = 80
+    # Button width & height
+    @button_width = 80
+    @button_height = 80
+    # Restart button
+    @restart_button = Button.new(250, 150, 130, 50, Gosu::Color::RED, ZOrder::BOTTOM, @button_text, "Play again", Gosu::Color::WHITE, ZOrder::MIDDLE)
   end
 
   def draw
@@ -61,8 +95,8 @@ class TicTacToe < Gosu::Window
         @text.draw_text(("It's a tie!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
       end
 
-      # Reset game button
-
+      # Restart game button
+      @restart_button.draw()
 
       # Exit game button
     end
@@ -70,9 +104,7 @@ class TicTacToe < Gosu::Window
   end
 
   def update
-    if (@game)
-      CheckForWinner()
-    end
+    
   end
 
   def needs_cursor?
@@ -87,7 +119,7 @@ class TicTacToe < Gosu::Window
         for i in 0..8
           if mouse_over_button?(mouse_x, mouse_y, @button_pos[i][0], @button_pos[i][1], @button_width, @button_height)
             if @board[i] != "O" and  @board[i] != "X"
-              @playerTurn = Handle_Turn(@playerTurn, i)
+              @player_turn = handle_turn(@player_turn, i)
             end
           end
         end
@@ -95,7 +127,14 @@ class TicTacToe < Gosu::Window
 
       if (!@game)
         # Reset game button
-
+        if @restart_button.mouse_over_button?(mouse_x, mouse_y)
+          @board = ["", "", "",
+                    "", "", "",
+                    "", "", ""]
+          @game = true
+          @player_turn = "O"
+          @winner = ""
+        end
 
         # Exit game button
       end
