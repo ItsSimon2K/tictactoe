@@ -13,7 +13,7 @@ class TicTacToe < Gosu::Window
     super(WIN_WIDTH, WIN_HEIGHT, false)
     @text = Gosu::Font.new(50)
     # Player's Turn
-    @playerTurn = "O"
+    @player_turn = "O"
     # Winner
     @winner = ""
     # Image of "O"
@@ -26,9 +26,8 @@ class TicTacToe < Gosu::Window
     @board = ["", "", "",
               "", "", "",
               "", "", ""]
-    
     # Top right Coords of each button
-    @buttonPos = [[200, 95],[280, 95],[360, 95],
+    @button_pos = [[200, 95],[280, 95],[360, 95],
                   [200, 175],[280, 175],[360, 175],
                   [200, 255],[280, 255],[360, 255]]
     # Button width
@@ -38,7 +37,7 @@ class TicTacToe < Gosu::Window
   def draw
     if (@game)
       # Display player's turn
-      @text.draw_text((@playerTurn + "\'s Turn"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+      @text.draw_text((@player_turn + "\'s Turn"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
 
       # Game board
       draw_rect(200, 95, 240, 240, Gosu::Color::RED, ZOrder::BOTTOM)
@@ -56,9 +55,10 @@ class TicTacToe < Gosu::Window
     if (!@game)
       if @winner == "X" or @winner == "O"
         # Display winner when the game ends and theres no tie
-        @text.draw((@winner + " Won!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+        @text.draw_text((@winner + " Won!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
       elsif @winner == ""
-        @text.draw(("It's a tie!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+        # Display tie if there is no winner
+        @text.draw_text(("It's a tie!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
       end
 
       # Reset game button
@@ -85,7 +85,7 @@ class TicTacToe < Gosu::Window
 
       if (@game)
         for i in 0..8
-          if mouse_over_button?(mouse_x, mouse_y, @buttonPos[i][0], @buttonPos[i][1], @buttonWidth)
+          if mouse_over_button?(mouse_x, mouse_y, @button_pos[i][0], @button_pos[i][1], @button_width, @button_height)
             if @board[i] != "O" and  @board[i] != "X"
               @playerTurn = Handle_Turn(@playerTurn, i)
             end
@@ -103,8 +103,8 @@ class TicTacToe < Gosu::Window
     end
   end
 
-  def mouse_over_button?(mouse_x, mouse_y, button_x, button_y, button_width)
-    if ((mouse_x > button_x and mouse_x < button_x + button_width) and (mouse_y > button_y and mouse_y < button_y + button_width)) 
+  def mouse_over_button?(mouse_x, mouse_y, button_x, button_y, button_width, button_height)
+    if ((mouse_x > button_x and mouse_x < button_x + button_width) and (mouse_y > button_y and mouse_y < button_y + button_height)) 
       true
     else
       false
@@ -115,31 +115,32 @@ class TicTacToe < Gosu::Window
   def CheckAndDraw(button)
     case @board[button]
     when "O"
-      @nought.draw(@buttonPos[button][0], @buttonPos[button][1], ZOrder::TOP)
+      @nought.draw(@button_pos[button][0], @button_pos[button][1], ZOrder::TOP)
     when "X"
-      @cross.draw(@buttonPos[button][0], @buttonPos[button][1], ZOrder::TOP)
+      @cross.draw(@button_pos[button][0], @button_pos[button][1], ZOrder::TOP)
     end
   end
 
-  def Handle_Turn(playerTurn, button)
-    PlaceSign(playerTurn,button)
-    SwitchPlayerTurn(playerTurn)
+  def handle_turn(player_turn, button)
+    place_sign(player_turn,button)
+    check_for_winner()
+    switch_player_turn(player_turn)
   end
 
   # Check the playerTurn then switch the turn to the other player
-  def SwitchPlayerTurn(playerTurn)
-    case playerTurn
+  def switch_player_turn(player_turn)
+    case player_turn
     when "O"
-      playerTurn = "X"
+      player_turn = "X"
     when "X"
-      playerTurn = "O"
+      player_turn = "O"
     end
-    return playerTurn
+    return player_turn
   end
 
   # Check the playerTurn then insert either "X" or "O" into the game board
-  def PlaceSign(playerTurn, button)
-    case playerTurn
+  def place_sign(player_turn, button)
+    case player_turn
     when "O"
       @board[button] = "O"
     when "X"
@@ -147,16 +148,16 @@ class TicTacToe < Gosu::Window
     end
   end
 
-  def CheckForWinner
-    diagonalwinner = CheckDiagonal(@board)
-    verticalwinner = CheckVertical(@board)
-    horizontalwinner = CheckHorizontal(@board)
-    if diagonalwinner
-      @winner = diagonalwinner
-    elsif verticalwinner
-      @winner = verticalwinner
-    elsif horizontalwinner
-      @winner = horizontalwinner
+  def check_for_winner
+    diagonal_winner = check_diagonal(@board)
+    vertical_winner = check_vertical(@board)
+    horizontal_winner = check_horizontal(@board)
+    if diagonal_winner
+      @winner = diagonal_winner
+    elsif vertical_winner
+      @winner = vertical_winner
+    elsif horizontal_winner
+      @winner = horizontal_winner
     else
       if !(@board.include? "")
         @winner = ""
@@ -166,7 +167,7 @@ class TicTacToe < Gosu::Window
   end
 
   # Check both diagonal
-  def CheckDiagonal(board)
+  def check_diagonal(board)
     diagonal1 = board[0] == board[4] && board[0] == board[8] && board[0] != ""
     diagonal2 = board[2] == board[4] && board[2] == board[6] && board[2] != ""
 
@@ -182,7 +183,7 @@ class TicTacToe < Gosu::Window
   end
 
   # Check all the columns
-  def CheckVertical(board)
+  def check_vertical(board)
     col1 = board[0] == board[3] && board[0] == board[6] && board[0] != ""
     col2 = board[1] == board[4] && board[1] == board[7] && board[1] != ""
     col3 = board[2] == board[5] && board[2] == board[8] && board[2] != ""
@@ -201,7 +202,7 @@ class TicTacToe < Gosu::Window
   end
 
   # Check all the rows
-  def CheckHorizontal(board)
+  def check_horizontal(board)
     row1 = board[0] == board[1] && board[0] == board[2] && board[0] != ""
     row2 = board[3] == board[4] && board[3] == board[5] && board[3] != ""
     row3 = board[6] == board[7] && board[6] == board[8] && board[6] != ""
@@ -218,7 +219,6 @@ class TicTacToe < Gosu::Window
       return board[6]
     end
   end
-
 end
 
 TicTacToe.new.show
