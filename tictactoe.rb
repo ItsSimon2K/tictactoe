@@ -37,6 +37,15 @@ class Button
   end
 end
 
+class Sign
+  attr_accessor
+
+  def initialize
+
+  end
+
+end
+
 class TicTacToe < Gosu::Window
 
   def initialize
@@ -57,15 +66,16 @@ class TicTacToe < Gosu::Window
     @board = ["", "", "",
               "", "", "",
               "", "", ""]
-    # Top right Coords of each button
+    # Top right Coords of each button on the board
     @button_pos = [[200, 95],[280, 95],[360, 95],
                   [200, 175],[280, 175],[360, 175],
                   [200, 255],[280, 255],[360, 255]]
-    # Button width & height
+    # Button's width & height on the board
     @button_width = 80
     @button_height = 80
     # Restart button
     @restart_button = Button.new(250, 150, 130, 50, Gosu::Color::RED, ZOrder::BOTTOM, @button_text, "Play again", Gosu::Color::WHITE, ZOrder::MIDDLE)
+    @exit_button = Button.new(250, 225, 130, 50, Gosu::Color::RED, ZOrder::BOTTOM, @button_text, "Exit game", Gosu::Color::WHITE, ZOrder::MIDDLE)
   end
 
   def draw
@@ -75,14 +85,14 @@ class TicTacToe < Gosu::Window
 
       # Game board
       draw_rect(200, 95, 240, 240, Gosu::Color::RED, ZOrder::BOTTOM)
-      draw_line(200, 176, Gosu::Color::BLACK, 440, 176, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
-      draw_line(200, 256, Gosu::Color::BLACK, 440, 256, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
-      draw_line(281, 95, Gosu::Color::BLACK, 281, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
-      draw_line(361, 95, Gosu::Color::BLACK, 361, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
+      draw_line(200, 175, Gosu::Color::BLACK, 440, 175, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
+      draw_line(200, 255, Gosu::Color::BLACK, 440, 255, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
+      draw_line(280, 95, Gosu::Color::BLACK, 280, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
+      draw_line(360, 95, Gosu::Color::BLACK, 360, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
 
       # Check the board and draw sign on the screen
       for i in 0..8
-        CheckAndDraw(i)
+        check_and_draw(i)
       end
     end
 
@@ -97,8 +107,8 @@ class TicTacToe < Gosu::Window
 
       # Restart game button
       @restart_button.draw()
-
       # Exit game button
+      @exit_button.draw()
     end
 
   end
@@ -135,8 +145,10 @@ class TicTacToe < Gosu::Window
           @player_turn = "O"
           @winner = ""
         end
-
         # Exit game button
+        if @exit_button.mouse_over_button?(mouse_x, mouse_y)
+          close
+        end
       end
       
     end
@@ -151,7 +163,7 @@ class TicTacToe < Gosu::Window
   end
 
   # Check the game board and draw either "X" or "O" on the screen 
-  def CheckAndDraw(button)
+  def check_and_draw(button)
     case @board[button]
     when "O"
       @nought.draw(@button_pos[button][0], @button_pos[button][1], ZOrder::TOP)
