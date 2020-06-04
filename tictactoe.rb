@@ -7,6 +7,61 @@ end
 WIN_WIDTH = 640
 WIN_HEIGHT = 400
 
+class Board
+  attr_accessor :board, :button_pos, :button_width, :button_height
+
+  def initialize
+
+    @board = ["", "", "",
+              "", "", "",
+              "", "", ""]
+
+    # Top right Coords of each button on the board
+    @button_pos = [[200, 95],[280, 95],[360, 95],
+                  [200, 175],[280, 175],[360, 175],
+                  [200, 255],[280, 255],[360, 255]]
+
+    # Button's width & height on the board
+    @button_width = 80
+    @button_height = 80
+
+    # Image of "O"
+    @nought = Gosu::Image.new("media/nought.png")
+    # Image of "X"
+    @cross = Gosu::Image.new("media/cross.png")
+  end
+
+  def draw
+    Gosu.draw_rect(200, 95, 240, 240, Gosu::Color::RED, ZOrder::BOTTOM)
+    Gosu.draw_line(200, 175, Gosu::Color::BLACK, 440, 175, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
+    Gosu.draw_line(200, 255, Gosu::Color::BLACK, 440, 255, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
+    Gosu.draw_line(280, 95, Gosu::Color::BLACK, 280, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
+    Gosu.draw_line(360, 95, Gosu::Color::BLACK, 360, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
+
+    for i in 0..8
+      check_and_draw(i)
+    end
+  end
+
+  def mouse_over_button?(mouse_x, mouse_y, button_x, button_y)
+    if ((mouse_x > button_x and mouse_x < button_x + @button_width) and (mouse_y > button_y and mouse_y < button_y + @button_height)) 
+      true
+    else
+      false
+    end
+  end
+
+  # Check the game board and draw either "X" or "O" on the screen 
+  def check_and_draw(button)
+    case @board[button]
+    when "O"
+      @nought.draw(@button_pos[button][0], @button_pos[button][1], ZOrder::TOP)
+    when "X"
+      @cross.draw(@button_pos[button][0], @button_pos[button][1], ZOrder::TOP)
+    end
+  end
+end
+
 class Button
   attr_accessor :button_x, :button_y, :button_width, :button_height, :button_color, :button_zorder, :text, :text_content, :text_color, :text_zorder
 
@@ -37,15 +92,6 @@ class Button
   end
 end
 
-class Sign
-  attr_accessor
-
-  def initialize
-
-  end
-
-end
-
 class TicTacToe < Gosu::Window
 
   def initialize
@@ -56,25 +102,17 @@ class TicTacToe < Gosu::Window
     @player_turn = "O"
     # Winner
     @winner = ""
-    # Image of "O"
-    @nought = Gosu::Image.new("media/nought.png")
-    # Image of "X"
-    @cross = Gosu::Image.new("media/cross.png")
+    
     # Game condition
     @game = true
+
     # Game board
-    @board = ["", "", "",
-              "", "", "",
-              "", "", ""]
-    # Top right Coords of each button on the board
-    @button_pos = [[200, 95],[280, 95],[360, 95],
-                  [200, 175],[280, 175],[360, 175],
-                  [200, 255],[280, 255],[360, 255]]
-    # Button's width & height on the board
-    @button_width = 80
-    @button_height = 80
+    @game_board = Board.new()
+
     # Restart button
     @restart_button = Button.new(250, 150, 130, 50, Gosu::Color::RED, ZOrder::BOTTOM, @button_text, "Play again", Gosu::Color::WHITE, ZOrder::MIDDLE)
+    
+    # Exit button
     @exit_button = Button.new(250, 225, 130, 50, Gosu::Color::RED, ZOrder::BOTTOM, @button_text, "Exit game", Gosu::Color::WHITE, ZOrder::MIDDLE)
   end
 
@@ -84,16 +122,7 @@ class TicTacToe < Gosu::Window
       @text.draw_text((@player_turn + "\'s Turn"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
 
       # Game board
-      draw_rect(200, 95, 240, 240, Gosu::Color::RED, ZOrder::BOTTOM)
-      draw_line(200, 175, Gosu::Color::BLACK, 440, 175, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
-      draw_line(200, 255, Gosu::Color::BLACK, 440, 255, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
-      draw_line(280, 95, Gosu::Color::BLACK, 280, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
-      draw_line(360, 95, Gosu::Color::BLACK, 360, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
-
-      # Check the board and draw sign on the screen
-      for i in 0..8
-        check_and_draw(i)
-      end
+      @game_board.draw()
     end
 
     if (!@game)
@@ -113,10 +142,6 @@ class TicTacToe < Gosu::Window
 
   end
 
-  def update
-    
-  end
-
   def needs_cursor?
     true
   end
@@ -127,8 +152,8 @@ class TicTacToe < Gosu::Window
 
       if (@game)
         for i in 0..8
-          if mouse_over_button?(mouse_x, mouse_y, @button_pos[i][0], @button_pos[i][1], @button_width, @button_height)
-            if @board[i] != "O" and  @board[i] != "X"
+          if @game_board.mouse_over_button?(mouse_x, mouse_y, @game_board.button_pos[i][0], @game_board.button_pos[i][1])
+            if @game_board.board[i] != "O" and  @game_board.board[i] != "X"
               @player_turn = handle_turn(@player_turn, i)
             end
           end
@@ -138,12 +163,7 @@ class TicTacToe < Gosu::Window
       if (!@game)
         # Reset game button
         if @restart_button.mouse_over_button?(mouse_x, mouse_y)
-          @board = ["", "", "",
-                    "", "", "",
-                    "", "", ""]
-          @game = true
-          @player_turn = "O"
-          @winner = ""
+          restart_game()
         end
         # Exit game button
         if @exit_button.mouse_over_button?(mouse_x, mouse_y)
@@ -151,24 +171,6 @@ class TicTacToe < Gosu::Window
         end
       end
       
-    end
-  end
-
-  def mouse_over_button?(mouse_x, mouse_y, button_x, button_y, button_width, button_height)
-    if ((mouse_x > button_x and mouse_x < button_x + button_width) and (mouse_y > button_y and mouse_y < button_y + button_height)) 
-      true
-    else
-      false
-    end
-  end
-
-  # Check the game board and draw either "X" or "O" on the screen 
-  def check_and_draw(button)
-    case @board[button]
-    when "O"
-      @nought.draw(@button_pos[button][0], @button_pos[button][1], ZOrder::TOP)
-    when "X"
-      @cross.draw(@button_pos[button][0], @button_pos[button][1], ZOrder::TOP)
     end
   end
 
@@ -193,16 +195,16 @@ class TicTacToe < Gosu::Window
   def place_sign(player_turn, button)
     case player_turn
     when "O"
-      @board[button] = "O"
+      @game_board.board[button] = "O"
     when "X"
-      @board[button] = "X"
+      @game_board.board[button] = "X"
     end
   end
 
   def check_for_winner
-    diagonal_winner = check_diagonal(@board)
-    vertical_winner = check_vertical(@board)
-    horizontal_winner = check_horizontal(@board)
+    diagonal_winner = check_diagonal(@game_board.board)
+    vertical_winner = check_vertical(@game_board.board)
+    horizontal_winner = check_horizontal(@game_board.board)
     if diagonal_winner
       @winner = diagonal_winner
     elsif vertical_winner
@@ -210,7 +212,7 @@ class TicTacToe < Gosu::Window
     elsif horizontal_winner
       @winner = horizontal_winner
     else
-      if !(@board.include? "")
+      if !(@game_board.board.include? "")
         @winner = ""
         @game = false
       end
@@ -269,6 +271,15 @@ class TicTacToe < Gosu::Window
     elsif row3
       return board[6]
     end
+  end
+
+  def restart_game
+    @game_board.board = ["", "", "",
+                         "", "", "",
+                         "", "", ""]
+    @game = true
+    @player_turn = "O"
+    @winner = ""
   end
 end
 
