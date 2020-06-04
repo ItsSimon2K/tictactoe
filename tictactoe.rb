@@ -96,13 +96,15 @@ class TicTacToe < Gosu::Window
 
   def initialize
     super(WIN_WIDTH, WIN_HEIGHT, false)
-    @text = Gosu::Font.new(50)
+    @display_text = Gosu::Font.new(50)
     @button_text = Gosu::Font.new(25)
+
     # Player's Turn
     @player_turn = "O"
+
     # Winner
     @winner = ""
-    
+
     # Game condition
     @game = true
 
@@ -119,8 +121,7 @@ class TicTacToe < Gosu::Window
   def draw
     if (@game)
       # Display player's turn
-      @text.draw_text((@player_turn + "\'s Turn"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
-
+      @display_text.draw_text((@player_turn + "\'s Turn"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
       # Game board
       @game_board.draw()
     end
@@ -128,12 +129,11 @@ class TicTacToe < Gosu::Window
     if (!@game)
       if @winner == "X" or @winner == "O"
         # Display winner when the game ends and theres no tie
-        @text.draw_text((@winner + " Won!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+        @display_text.draw_text((@winner + " Won!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
       elsif @winner == ""
         # Display tie if there is no winner
-        @text.draw_text(("It's a tie!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+        @display_text.draw_text(("It's a tie!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
       end
-
       # Restart game button
       @restart_button.draw()
       # Exit game button
