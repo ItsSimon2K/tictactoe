@@ -8,7 +8,7 @@ WIN_WIDTH = 640
 WIN_HEIGHT = 400
 
 class Board
-  attr_accessor :board, :button_pos, :button_width, :button_height
+  attr_accessor :board, :button_pos
 
   def initialize
 
@@ -44,7 +44,8 @@ class Board
   end
 
   def mouse_over_button?(mouse_x, mouse_y, button_x, button_y)
-    if ((mouse_x > button_x and mouse_x < button_x + @button_width) and (mouse_y > button_y and mouse_y < button_y + @button_height)) 
+    if ((mouse_x > button_x && mouse_x < button_x + @button_width) && 
+      (mouse_y > button_y && mouse_y < button_y + @button_height)) 
       true
     else
       false
@@ -63,7 +64,6 @@ class Board
 end
 
 class Button
-  attr_accessor :button_x, :button_y, :button_width, :button_height, :text_content
 
   def initialize(window, button_x, button_y, button_width, button_height, text_content)
     @window = window
@@ -84,6 +84,16 @@ class Button
     @text.draw_text(@text_content, @button_x + (@button_width / 8), @button_y + (@button_height / 4), @text_zorder, 1, 1, @text_color, mode=:default)
   end
 
+  def update
+    if mouse_over_button?
+      @button_color = Gosu::Color::WHITE
+      @text_color = Gosu::Color::RED
+    else
+      @button_color = Gosu::Color::RED
+      @text_color = Gosu::Color::WHITE
+    end
+  end
+
   def button_down(id)
     if id == Gosu::MsLeft && mouse_over_button?
       true
@@ -93,7 +103,8 @@ class Button
   end
 
   def mouse_over_button?
-    if ((@window.mouse_x > @button_x and @window.mouse_x < @button_x + @button_width) and (@window.mouse_y > @button_y and @window.mouse_y < @button_y + @button_height)) 
+    if ((@window.mouse_x > @button_x && @window.mouse_x < @button_x + @button_width) && 
+      (@window.mouse_y > @button_y && @window.mouse_y < @button_y + @button_height)) 
       true
     else
       false
@@ -105,7 +116,9 @@ class TicTacToe < Gosu::Window
 
   def initialize
     super(WIN_WIDTH, WIN_HEIGHT, false)
+    self.caption = "TicTacToe"
     @display_text = Gosu::Font.new(50)
+    @display_text_pos = [235, 50]
 
     # Player's Turn
     @player_turn = "O"
@@ -120,16 +133,19 @@ class TicTacToe < Gosu::Window
     @game_board = Board.new()
 
     # Restart button
-    @restart_button = Button.new(self, 250, 150, 130, 50, "Play again")
+    @restart_button = Button.new(self, ((WIN_WIDTH / 2) - (130 / 2)), 150, 130, 50, "Play again")
     
     # Exit button
-    @exit_button = Button.new(self, 250, 225, 130, 50, "Exit game")
+    @exit_button = Button.new(self, ((WIN_WIDTH / 2) - (130 / 2)), 225, 130, 50, "Exit game")
   end
 
   def draw
+    # Background
+    Gosu.draw_rect(0, 0, WIN_WIDTH, WIN_HEIGHT, Gosu::Color::GRAY, ZOrder::BACKGROUND)
+
     if (@game)
       # Display player's turn
-      @display_text.draw_text((@player_turn + "\'s Turn"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+      @display_text.draw_text((@player_turn + "\'s Turn"), @display_text_pos[0], @display_text_pos[1], ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
       # Game board
       @game_board.draw()
     end
@@ -137,10 +153,10 @@ class TicTacToe < Gosu::Window
     if (!@game)
       if @winner == "X" or @winner == "O"
         # Display winner when the game ends and theres no tie
-        @display_text.draw_text((@winner + " Won!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+        @display_text.draw_text((@winner + " Wins!"), @display_text_pos[0], @display_text_pos[1], ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
       elsif @winner == ""
         # Display tie if there is no winner
-        @display_text.draw_text(("It's a tie!"), 230, 50, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+        @display_text.draw_text(("It's a tie!"), @display_text_pos[0], @display_text_pos[1], ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
       end
       # Restart game button
       @restart_button.draw()
@@ -148,6 +164,11 @@ class TicTacToe < Gosu::Window
       @exit_button.draw()
     end
 
+  end
+
+  def update
+    @restart_button.update()
+    @exit_button.update()
   end
 
   def needs_cursor?
@@ -161,16 +182,16 @@ class TicTacToe < Gosu::Window
       if (@game)
         for i in 0..8
           if @game_board.mouse_over_button?(mouse_x, mouse_y, @game_board.button_pos[i][0], @game_board.button_pos[i][1])
-            if @game_board.board[i] != "O" and  @game_board.board[i] != "X"
+            if @game_board.board[i] != "O" &&  @game_board.board[i] != "X"
               @player_turn = handle_turn(@player_turn, i)
             end
           end
         end
       end
-
     end
+
     if (!@game)
-      # Reset game button
+      # Restart game button
       if @restart_button.button_down(id)
         restart_game()
       end
@@ -228,8 +249,13 @@ class TicTacToe < Gosu::Window
 
   # Check both diagonal
   def check_diagonal(board)
-    diagonal1 = board[0] == board[4] && board[0] == board[8] && board[0] != ""
-    diagonal2 = board[2] == board[4] && board[2] == board[6] && board[2] != ""
+    diagonal1 = board[0] == board[4] && 
+                board[0] == board[8] && 
+                board[0] != ""
+
+    diagonal2 = board[2] == board[4] && 
+                board[2] == board[6] && 
+                board[2] != ""
 
     if diagonal1 || diagonal2
       @game = false
@@ -244,9 +270,17 @@ class TicTacToe < Gosu::Window
 
   # Check all the columns
   def check_vertical(board)
-    col1 = board[0] == board[3] && board[0] == board[6] && board[0] != ""
-    col2 = board[1] == board[4] && board[1] == board[7] && board[1] != ""
-    col3 = board[2] == board[5] && board[2] == board[8] && board[2] != ""
+    col1 = board[0] == board[3] && 
+           board[0] == board[6] && 
+           board[0] != ""
+
+    col2 = board[1] == board[4] && 
+           board[1] == board[7] && 
+           board[1] != ""
+
+    col3 = board[2] == board[5] && 
+           board[2] == board[8] && 
+           board[2] != ""
 
     if col1 || col2 || col3
       @game = false
@@ -263,9 +297,17 @@ class TicTacToe < Gosu::Window
 
   # Check all the rows
   def check_horizontal(board)
-    row1 = board[0] == board[1] && board[0] == board[2] && board[0] != ""
-    row2 = board[3] == board[4] && board[3] == board[5] && board[3] != ""
-    row3 = board[6] == board[7] && board[6] == board[8] && board[6] != ""
+    row1 = board[0] == board[1] && 
+           board[0] == board[2] && 
+           board[0] != ""
+           
+    row2 = board[3] == board[4] && 
+           board[3] == board[5] && 
+           board[3] != ""
+
+    row3 = board[6] == board[7] && 
+           board[6] == board[8] && 
+           board[6] != ""
 
     if row1 || row2 || row3
       @game = false
