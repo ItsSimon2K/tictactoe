@@ -63,19 +63,20 @@ class Board
 end
 
 class Button
-  attr_accessor :button_x, :button_y, :button_width, :button_height, :button_color, :button_zorder, :text, :text_content, :text_color, :text_zorder
+  attr_accessor :button_x, :button_y, :button_width, :button_height, :text_content
 
-  def initialize(button_x, button_y, button_width, button_height, button_color, button_zorder, text, text_content, text_color, text_zorder)
+  def initialize(window, button_x, button_y, button_width, button_height, text_content)
+    @window = window
     @button_x = button_x
     @button_y = button_y
     @button_width = button_width
     @button_height = button_height
-    @button_color = button_color
-    @button_zorder = button_zorder
-    @text = text
+    @button_color = Gosu::Color::RED
+    @button_zorder = ZOrder::BOTTOM
+    @text = Gosu::Font.new(25)
     @text_content = text_content
-    @text_color = text_color
-    @text_zorder = text_zorder
+    @text_color = Gosu::Color::WHITE
+    @text_zorder = ZOrder::MIDDLE
   end
 
   def draw
@@ -83,8 +84,16 @@ class Button
     @text.draw_text(@text_content, @button_x + (@button_width / 8), @button_y + (@button_height / 4), @text_zorder, 1, 1, @text_color, mode=:default)
   end
 
-  def mouse_over_button?(mouse_x, mouse_y)
-    if ((mouse_x > @button_x and mouse_x < @button_x + @button_width) and (mouse_y > @button_y and mouse_y < @button_y + @button_height)) 
+  def button_down(id)
+    if id == Gosu::MsLeft && mouse_over_button?
+      true
+    else
+      false
+    end
+  end
+
+  def mouse_over_button?
+    if ((@window.mouse_x > @button_x and @window.mouse_x < @button_x + @button_width) and (@window.mouse_y > @button_y and @window.mouse_y < @button_y + @button_height)) 
       true
     else
       false
@@ -97,7 +106,6 @@ class TicTacToe < Gosu::Window
   def initialize
     super(WIN_WIDTH, WIN_HEIGHT, false)
     @display_text = Gosu::Font.new(50)
-    @button_text = Gosu::Font.new(25)
 
     # Player's Turn
     @player_turn = "O"
@@ -112,10 +120,10 @@ class TicTacToe < Gosu::Window
     @game_board = Board.new()
 
     # Restart button
-    @restart_button = Button.new(250, 150, 130, 50, Gosu::Color::RED, ZOrder::BOTTOM, @button_text, "Play again", Gosu::Color::WHITE, ZOrder::MIDDLE)
+    @restart_button = Button.new(self, 250, 150, 130, 50, "Play again")
     
     # Exit button
-    @exit_button = Button.new(250, 225, 130, 50, Gosu::Color::RED, ZOrder::BOTTOM, @button_text, "Exit game", Gosu::Color::WHITE, ZOrder::MIDDLE)
+    @exit_button = Button.new(self, 250, 225, 130, 50, "Exit game")
   end
 
   def draw
@@ -160,17 +168,16 @@ class TicTacToe < Gosu::Window
         end
       end
 
-      if (!@game)
-        # Reset game button
-        if @restart_button.mouse_over_button?(mouse_x, mouse_y)
-          restart_game()
-        end
-        # Exit game button
-        if @exit_button.mouse_over_button?(mouse_x, mouse_y)
-          close
-        end
+    end
+    if (!@game)
+      # Reset game button
+      if @restart_button.button_down(id)
+        restart_game()
       end
-      
+      # Exit game button
+      if @exit_button.button_down(id)
+        close
+      end
     end
   end
 
