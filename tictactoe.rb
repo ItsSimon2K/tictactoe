@@ -22,7 +22,7 @@ class TicTacToe < Gosu::Window
     @game = true
     @input_menu = true
 
-    # Array to store match history (string)
+    # Array to store match results (string)
     @matchesarr = Array.new()
 
     # Read match history from text file
@@ -110,7 +110,18 @@ class TicTacToe < Gosu::Window
         @player1_input.button_down(id)
         @player2_input.button_down(id)
         if @done_button.button_down(id)
-          
+          player1_name = @player1_input.text
+          player2_name = @player2_input.text
+          if @winner == "O"
+            match_result = "#{player1_name}(win) vs #{player2_name}"
+          elsif @winner == "X"
+            match_result = "#{player1_name} vs #{player2_name}(win)"
+          else
+            match_result = "#{player1_name} vs #{player2_name} (tie)"
+          end
+          @matchesarr << match_result
+          write_file
+          @input_menu = false
         end
       end
 
@@ -127,17 +138,33 @@ class TicTacToe < Gosu::Window
     end
   end
 
+  # Read the text file
   def read_file
     match_file = File.new("matches.txt", "r")
     no_of_match = match_file.gets.chomp.to_i
     if no_of_match != nil
       
       for i in 0..no_of_match - 1
-        match = match_file.gets
-        matchesarr << match
+        match_result = match_file.gets
+        @matchesarr << match_result
       end
     end
     match_file.close
+  end
+
+  # Update the text file
+  def write_file
+    match_file = File.new("matches.txt", "w")
+    no_of_match = @matchesarr.length
+    match_file.puts(no_of_match.to_s)
+    for i in 0..no_of_match - 1
+      match_file.puts(@matchesarr[i])
+    end
+  end
+
+  def display_matches
+    # display match results on screen
+    return
   end
 
   def draw_display_text(font, text, x, y)
