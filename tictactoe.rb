@@ -1,123 +1,15 @@
 require "gosu"
+Dir[File.join(__dir__, 'lib/**/*.rb')].sort.each { |file| require file }
 
-module ZOrder
-  BACKGROUND, BOTTOM, MIDDLE, TOP = *0..3
-end
-
-WIN_WIDTH = 640
-WIN_HEIGHT = 400
-
-class Board
-  attr_accessor :board, :button_pos
-
-  def initialize
-
-    @board = ["", "", "",
-              "", "", "",
-              "", "", ""]
-
-    # Top right Coords of each button on the board
-    @button_pos = [[200, 95],[280, 95],[360, 95],
-                  [200, 175],[280, 175],[360, 175],
-                  [200, 255],[280, 255],[360, 255]]
-
-    # Button's width & height on the board
-    @button_width = 80
-    @button_height = 80
-
-    # Image of "O"
-    @nought = Gosu::Image.new("media/nought.png")
-    # Image of "X"
-    @cross = Gosu::Image.new("media/cross.png")
-  end
-
-  def draw
-    Gosu.draw_rect(200, 95, 240, 240, Gosu::Color::RED, ZOrder::BOTTOM)
-    Gosu.draw_line(200, 175, Gosu::Color::BLACK, 440, 175, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
-    Gosu.draw_line(200, 255, Gosu::Color::BLACK, 440, 255, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
-    Gosu.draw_line(280, 95, Gosu::Color::BLACK, 280, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
-    Gosu.draw_line(360, 95, Gosu::Color::BLACK, 360, 335, Gosu::Color::BLACK, ZOrder::MIDDLE, mode=:default)
-
-    for i in 0..8
-      check_and_draw(i)
-    end
-  end
-
-  def mouse_over_button?(mouse_x, mouse_y, button_x, button_y)
-    if ((mouse_x > button_x && mouse_x < button_x + @button_width) && 
-      (mouse_y > button_y && mouse_y < button_y + @button_height)) 
-      true
-    else
-      false
-    end
-  end
-
-  # Check the game board and draw either "X" or "O" on the screen 
-  def check_and_draw(button)
-    case @board[button]
-    when "O"
-      @nought.draw(@button_pos[button][0], @button_pos[button][1], ZOrder::TOP)
-    when "X"
-      @cross.draw(@button_pos[button][0], @button_pos[button][1], ZOrder::TOP)
-    end
-  end
-end
-
-class Button
-
-  def initialize(window, button_x, button_y, button_width, button_height, text_content)
-    @window = window
-    @button_x = button_x
-    @button_y = button_y
-    @button_width = button_width
-    @button_height = button_height
-    @button_color = Gosu::Color::RED
-    @button_zorder = ZOrder::BOTTOM
-    @text = Gosu::Font.new(25)
-    @text_content = text_content
-    @text_color = Gosu::Color::WHITE
-    @text_zorder = ZOrder::MIDDLE
-  end
-
-  def draw
-    Gosu.draw_rect(@button_x, @button_y, @button_width, @button_height, @button_color, @button_zorder)
-    @text.draw_text(@text_content, @button_x + (@button_width / 8), @button_y + (@button_height / 4), @text_zorder, 1, 1, @text_color, mode=:default)
-  end
-
-  def update
-    if mouse_over_button?
-      @button_color = Gosu::Color::WHITE
-      @text_color = Gosu::Color::RED
-    else
-      @button_color = Gosu::Color::RED
-      @text_color = Gosu::Color::WHITE
-    end
-  end
-
-  def button_down(id)
-    if id == Gosu::MsLeft && mouse_over_button?
-      true
-    else
-      false
-    end
-  end
-
-  def mouse_over_button?
-    if ((@window.mouse_x > @button_x && @window.mouse_x < @button_x + @button_width) && 
-      (@window.mouse_y > @button_y && @window.mouse_y < @button_y + @button_height)) 
-      true
-    else
-      false
-    end
-  end
-end
-
+# Main Window class
 class TicTacToe < Gosu::Window
 
   def initialize
     super(WIN_WIDTH, WIN_HEIGHT, false)
+
     self.caption = "TicTacToe"
-    @display_text = Gosu::Font.new(50)
+
+    # Display text's position
     @display_text_pos = [235, 50]
 
     # Player's Turn
@@ -128,9 +20,23 @@ class TicTacToe < Gosu::Window
 
     # Game condition
     @game = true
+    @input_menu = true
+
+    # Array to store match history (string)
+    @matchesarr = Array.new()
+
+    # Read match history from text file
+    read_file
 
     # Game board
     @game_board = Board.new()
+
+    # Player name input
+    @player1_input = TextInput.new(self, FONT_SMALL, 200, 135, ZOrder::MIDDLE, 250, "Enter name")
+    @player2_input = TextInput.new(self, FONT_SMALL, 200, 235, ZOrder::MIDDLE, 250, "Enter name")
+
+    # Done button
+    @done_button = Button.new(self, ((WIN_WIDTH / 2) - (130 / 2)), 275, 130, 50, "   Done")
 
     # Restart button
     @restart_button = Button.new(self, ((WIN_WIDTH / 2) - (130 / 2)), 150, 130, 50, "Play again")
@@ -145,7 +51,7 @@ class TicTacToe < Gosu::Window
 
     if (@game)
       # Display player's turn
-      @display_text.draw_text((@player_turn + "\'s Turn"), @display_text_pos[0], @display_text_pos[1], ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+      draw_display_text(FONT_LARGE, @player_turn + "\'s Turn", @display_text_pos[0], @display_text_pos[1])
       # Game board
       @game_board.draw()
     end
@@ -153,22 +59,32 @@ class TicTacToe < Gosu::Window
     if (!@game)
       if @winner == "X" or @winner == "O"
         # Display winner when the game ends and theres no tie
-        @display_text.draw_text((@winner + " Wins!"), @display_text_pos[0], @display_text_pos[1], ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+        draw_display_text(FONT_LARGE, @winner + " Wins!", @display_text_pos[0], @display_text_pos[1])
       elsif @winner == ""
-        # Display tie if there is no winner
-        @display_text.draw_text(("It's a tie!"), @display_text_pos[0], @display_text_pos[1], ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
+        # Display tie when there is no winner
+        draw_display_text(FONT_LARGE, "It's a tie!", @display_text_pos[0], @display_text_pos[1])
       end
-      # Restart game button
-      @restart_button.draw()
-      # Exit game button
-      @exit_button.draw()
+
+      if @input_menu
+        draw_display_text(FONT_MEDIUM, "Player1's name (O):", 200, 100)
+        @player1_input.draw()
+        draw_display_text(FONT_MEDIUM, "Player2's name (X):", 200, 200)
+        @player2_input.draw()
+        @done_button.draw()
+      end
+      if (!@input_menu)
+        # Restart game button
+        @restart_button.draw()
+        # Exit game button
+        @exit_button.draw()
+      end
     end
 
   end
 
   def update
-    @restart_button.update()
-    @exit_button.update()
+    @player1_input.update()
+    @player2_input.update()
   end
 
   def needs_cursor?
@@ -178,7 +94,6 @@ class TicTacToe < Gosu::Window
   def button_down(id)
     case id
     when Gosu::MsLeft
-
       if (@game)
         for i in 0..8
           if @game_board.mouse_over_button?(mouse_x, mouse_y, @game_board.button_pos[i][0], @game_board.button_pos[i][1])
@@ -191,15 +106,42 @@ class TicTacToe < Gosu::Window
     end
 
     if (!@game)
-      # Restart game button
-      if @restart_button.button_down(id)
-        restart_game()
+      if @input_menu
+        @player1_input.button_down(id)
+        @player2_input.button_down(id)
+        if @done_button.button_down(id)
+          
+        end
       end
-      # Exit game button
-      if @exit_button.button_down(id)
-        close
+
+      if (!@input_menu)
+        # Restart game button
+        if @restart_button.button_down(id)
+          restart_game()
+        end
+        # Exit game button
+        if @exit_button.button_down(id)
+          close
+        end
       end
     end
+  end
+
+  def read_file
+    match_file = File.new("matches.txt", "r")
+    no_of_match = match_file.gets.chomp.to_i
+    if no_of_match != nil
+      
+      for i in 0..no_of_match - 1
+        match = match_file.gets
+        matchesarr << match
+      end
+    end
+    match_file.close
+  end
+
+  def draw_display_text(font, text, x, y)
+    font.draw_text(text, x, y, ZOrder::MIDDLE, 1, 1, Gosu::Color::WHITE, mode=:default)
   end
 
   def handle_turn(player_turn, button)
