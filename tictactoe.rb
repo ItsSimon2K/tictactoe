@@ -21,7 +21,8 @@ class TicTacToe < Gosu::Window
     # Game condition
     @game = true
     @input_menu = true
-
+    @player1_field_empty = false
+    @player2_field_empty = false
     # Array to store match results (string)
     @matchesarr = Array.new()
 
@@ -32,23 +33,61 @@ class TicTacToe < Gosu::Window
     @game_board = Board.new()
 
     # Player name input
-    @player1_input = TextInput.new(self, FONT_SMALL, 200, 135, ZOrder::MIDDLE, 250, "Enter name")
-    @player2_input = TextInput.new(self, FONT_SMALL, 200, 235, ZOrder::MIDDLE, 250, "Enter name")
+    @player1_input = TextInput.new(self, 
+                                   FONT_SMALL, 
+                                   200, 
+                                   135, 
+                                   ZOrder::MIDDLE, 
+                                   250, 
+                                   "Enter name")\
+
+    @player2_input = TextInput.new(self, 
+                                   FONT_SMALL, 
+                                   200, 
+                                   235, 
+                                   ZOrder::MIDDLE, 
+                                   250, 
+                                   "Enter name")
 
     # Done button
-    @done_button = Button.new(self, ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 275, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, "   Done")
+    @done_button = Button.new(self, 
+                             ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 
+                             275, 
+                             MENU_BUTTON_WIDTH, 
+                             MENU_BUTTON_HEIGHT, 
+                             "   Done")
 
     # Match results button
-    @match_results_button = Button.new(self, ((WIN_WIDTH / 2) - (200 / 2)) , WIN_HEIGHT - 60, 200, 40, "Match Results")
+    @match_results_button = Button.new(self, 
+                                      ((WIN_WIDTH / 2) - (200 / 2)), 
+                                      WIN_HEIGHT - 60, 
+                                      200, 
+                                      40, 
+                                      "Match Results")
 
     # Back button
-    @back_button = Button.new(self, ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 280, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, "   Back")
+    @back_button = Button.new(self, 
+                              ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 
+                              280, 
+                              MENU_BUTTON_WIDTH, 
+                              MENU_BUTTON_HEIGHT, 
+                              "   Back")
 
     # Restart button
-    @restart_button = Button.new(self, ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 150, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, "Play again")
+    @restart_button = Button.new(self, 
+                                 ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 
+                                 150, 
+                                 MENU_BUTTON_WIDTH, 
+                                 MENU_BUTTON_HEIGHT, 
+                                 "Play again")
 
     # Exit button
-    @exit_button = Button.new(self, ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 225, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, "Exit game")
+    @exit_button = Button.new(self, 
+                              ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 
+                              225, 
+                              MENU_BUTTON_WIDTH, 
+                              MENU_BUTTON_HEIGHT, 
+                              "Exit game")
   end
 
   def draw
@@ -64,6 +103,12 @@ class TicTacToe < Gosu::Window
       if @input_menu
         draw_game_result
         draw_textinput_menu
+        if @player1_field_empty
+          draw_display_text(FONT_SMALL, "Please enter name", 460, 135)
+        end
+        if @player2_field_empty
+          draw_display_text(FONT_SMALL, "Please enter name", 460, 235)
+        end
       else(!@input_menu)
         if (!@match_results_menu)
           draw_game_result
@@ -122,11 +167,20 @@ class TicTacToe < Gosu::Window
             @input_menu = false
           else
             # Display msg telling the players to enter their name
-            
+            if player1_name.length <= 0
+              @player1_field_empty = true
+            else
+              @player1_field_empty = false
+            end
+            if player2_name.length <= 0
+              @player2_field_empty = true
+            else
+              @player2_field_empty = false
+            end
           end
         end
       else
-        if !@match_results_menu
+        if (!@match_results_menu)
           # Restart game button
           if @restart_button.button_down(id)
             restart_game()
@@ -139,7 +193,6 @@ class TicTacToe < Gosu::Window
           if @match_results_button.button_down(id)
             @match_results_menu = true
           end
-
         else
           # Back button
           if @back_button.button_down(id)

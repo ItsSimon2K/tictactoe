@@ -7,13 +7,12 @@ class Button
     @button_y = button_y
     @button_width = button_width
     @button_height = button_height
-    @button_color = Gosu::Color::RED
-    @button_hover = Gosu::Color::WHITE
+    @button_color = 0xFF1D4DB5
+    @button_hover = 0xFF1D5DBA
     @button_zorder = ZOrder::BOTTOM
     @text = Gosu::Font.new(25)
     @text_content = text_content
     @text_color = Gosu::Color::WHITE
-    @text_hover = Gosu::Color::RED
     @text_zorder = ZOrder::MIDDLE
   end
 
@@ -31,18 +30,8 @@ class Button
                     @text_zorder, 
                     1, 
                     1, 
-                    mouse_over_button? ? @text_hover : @text_color,
+                    @text_color,
                     mode=:default)
-  end
-
-  def update
-    if mouse_over_button?
-      @button_color = Gosu::Color::WHITE
-      @text_color = Gosu::Color::RED
-    else
-      @button_color = Gosu::Color::RED
-      @text_color = Gosu::Color::WHITE
-    end
   end
 
   def button_down(id)
