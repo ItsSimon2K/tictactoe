@@ -36,13 +36,19 @@ class TicTacToe < Gosu::Window
     @player2_input = TextInput.new(self, FONT_SMALL, 200, 235, ZOrder::MIDDLE, 250, "Enter name")
 
     # Done button
-    @done_button = Button.new(self, ((WIN_WIDTH / 2) - (BUTTON_WIDTH / 2)), 275, BUTTON_WIDTH, BUTTON_HEIGHT, "   Done")
+    @done_button = Button.new(self, ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 275, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, "   Done")
+
+    # Match results button
+    @match_results_button = Button.new(self, ((WIN_WIDTH / 2) - (200 / 2)) , WIN_HEIGHT - 60, 200, 40, "Match Results")
+
+    # Back button
+    @back_button = Button.new(self, ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 280, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, "   Back")
 
     # Restart button
-    @restart_button = Button.new(self, ((WIN_WIDTH / 2) - (BUTTON_WIDTH / 2)), 150, BUTTON_WIDTH, BUTTON_HEIGHT, "Play again")
+    @restart_button = Button.new(self, ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 150, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, "Play again")
 
     # Exit button
-    @exit_button = Button.new(self, ((WIN_WIDTH / 2) - (BUTTON_WIDTH / 2)), 225, BUTTON_WIDTH, BUTTON_HEIGHT, "Exit game")
+    @exit_button = Button.new(self, ((WIN_WIDTH / 2) - (MENU_BUTTON_WIDTH / 2)), 225, MENU_BUTTON_WIDTH, MENU_BUTTON_HEIGHT, "Exit game")
   end
 
   def draw
@@ -54,12 +60,18 @@ class TicTacToe < Gosu::Window
     end
 
     if (!@game)
-      draw_game_result
+      
       if @input_menu
+        draw_game_result
         draw_textinput_menu
-      end
-      if (!@input_menu)
-        draw_endgame_menu
+      else(!@input_menu)
+        if (!@match_results_menu)
+          draw_game_result
+          draw_endgame_menu
+        else
+          draw_matches
+          @back_button.draw()
+        end
       end
     end
   end
@@ -113,16 +125,26 @@ class TicTacToe < Gosu::Window
             
           end
         end
-      end
+      else
+        if !@match_results_menu
+          # Restart game button
+          if @restart_button.button_down(id)
+            restart_game()
+          end
+          # Exit game button
+          if @exit_button.button_down(id)
+            close
+          end
+          # Match results button
+          if @match_results_button.button_down(id)
+            @match_results_menu = true
+          end
 
-      if (!@input_menu)
-        # Restart game button
-        if @restart_button.button_down(id)
-          restart_game()
-        end
-        # Exit game button
-        if @exit_button.button_down(id)
-          close
+        else
+          # Back button
+          if @back_button.button_down(id)
+            @match_results_menu = false
+          end
         end
       end
     end
@@ -158,7 +180,7 @@ class TicTacToe < Gosu::Window
   end
 
   # Display all previous match results
-  def display_matches
+  def draw_matches
     draw_display_text(FONT_LARGE, "Match History", 185, 50)
     y = 100
     for i in 0..@matchesarr.length - 1
@@ -196,6 +218,7 @@ class TicTacToe < Gosu::Window
   end
 
   def draw_endgame_menu
+    @match_results_button.draw()
     # Restart game button
     @restart_button.draw()
     # Exit game button
