@@ -24,7 +24,7 @@ class Board
   end
 
   def draw
-    Gosu.draw_rect(200, 95, 240, 240, Gosu::Color::RED, ZOrder::BOTTOM)
+    Gosu.draw_rect(200, 95, 240, 240, 0xFF1D5DBA, ZOrder::BOTTOM)
 
     Gosu.draw_line(200, 175, Gosu::Color::BLACK, 
                    440, 175, Gosu::Color::BLACK, 
