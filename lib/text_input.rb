@@ -9,7 +9,7 @@ class TextInput < Gosu::TextInput
 
   attr_reader :x, :y
 
-  def initialize(window, font, x, y, zorder, width, placeholder)
+  def initialize(window, font, x, y, zorder, width, height, placeholder)
     super()
 
     @window = window
@@ -18,9 +18,8 @@ class TextInput < Gosu::TextInput
     @y = y
     @zorder = zorder
     @width = width
+    @height = height
     @placeholder = placeholder
-
-    update_rect
   end
 
   def button_down(id)
@@ -28,10 +27,6 @@ class TextInput < Gosu::TextInput
       @window.text_input = self
       self.caret_pos = self.selection_start = text.length
     end
-  end
-
-  def update
-    update_rect
   end
 
   def draw
@@ -70,10 +65,6 @@ class TextInput < Gosu::TextInput
       1,
       text.empty? ? PLACEHOLDER_COLOR : TEXT_COLOR
     )
-  end
-
-  def update_rect
-    @height = @font.height * 1.5
   end
 
   def mouse_over_button?

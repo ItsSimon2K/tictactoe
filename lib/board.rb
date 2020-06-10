@@ -8,7 +8,7 @@ class Board
               "", "", "",
               "", "", ""]
 
-    # Top right Coords of each button on the board
+    # Top left Coords of each button on the board
     @button_pos = [[200, 95],[280, 95],[360, 95],
                   [200, 175],[280, 175],[360, 175],
                   [200, 255],[280, 255],[360, 255]]

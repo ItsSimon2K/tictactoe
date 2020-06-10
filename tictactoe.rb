@@ -44,8 +44,9 @@ class TicTacToe < Gosu::Window
                                    200, 
                                    135, 
                                    ZOrder::MIDDLE, 
-                                   250, 
-                                   "Enter name")\
+                                   250,
+                                   28,
+                                   "Enter name")
     
     # Player2 name input
     @player2_input = TextInput.new(self, 
@@ -53,7 +54,8 @@ class TicTacToe < Gosu::Window
                                    200, 
                                    235, 
                                    ZOrder::MIDDLE, 
-                                   250, 
+                                   250,
+                                   28,
                                    "Enter name")
 
     # Done button
@@ -124,12 +126,6 @@ class TicTacToe < Gosu::Window
         end
       end
     end
-  end
-
-  def update
-    # Update the text input
-    @player1_input.update()
-    @player2_input.update()
   end
 
   def needs_cursor?
@@ -208,9 +204,9 @@ class TicTacToe < Gosu::Window
   # Read the text file
   def read_file
     match_file = File.new("matches.txt", "r")
-    no_of_match = match_file.gets.chomp.to_i
+    no_of_match = match_file.gets
     if no_of_match != nil
-      for i in 0..no_of_match - 1
+      for i in 0..no_of_match.to_i - 1
         match_result = match_file.gets
         @matchesarr << match_result
       end
