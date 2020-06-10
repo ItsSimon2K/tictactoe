@@ -18,11 +18,17 @@ class TicTacToe < Gosu::Window
     # Winner
     @winner = ""
 
-    # Game condition
+    # Use to check for game condition
     @game = true
+
+    # Use to change menu depend on which button is clicked
     @input_menu = true
+    @match_results_menu = false
+
+    # Use to display message if the input field is empty
     @player1_field_empty = false
     @player2_field_empty = false
+
     # Array to store match results (string)
     @matchesarr = Array.new()
 
@@ -32,7 +38,7 @@ class TicTacToe < Gosu::Window
     # Game board
     @game_board = Board.new()
 
-    # Player name input
+    # Player1 name input
     @player1_input = TextInput.new(self, 
                                    FONT_SMALL, 
                                    200, 
@@ -40,7 +46,8 @@ class TicTacToe < Gosu::Window
                                    ZOrder::MIDDLE, 
                                    250, 
                                    "Enter name")\
-
+    
+    # Player2 name input
     @player2_input = TextInput.new(self, 
                                    FONT_SMALL, 
                                    200, 
@@ -55,7 +62,7 @@ class TicTacToe < Gosu::Window
                              275, 
                              MENU_BUTTON_WIDTH, 
                              MENU_BUTTON_HEIGHT, 
-                             "   Done")
+                             "Done")
 
     # Match results button
     @match_results_button = Button.new(self, 
@@ -71,7 +78,7 @@ class TicTacToe < Gosu::Window
                               280, 
                               MENU_BUTTON_WIDTH, 
                               MENU_BUTTON_HEIGHT, 
-                              "   Back")
+                              "Back")
 
     # Restart button
     @restart_button = Button.new(self, 
@@ -95,27 +102,25 @@ class TicTacToe < Gosu::Window
     Gosu.draw_rect(0, 0, WIN_WIDTH, WIN_HEIGHT, Gosu::Color::GRAY, ZOrder::BACKGROUND)
 
     if (@game)
+      # Draw board and Display text that display player's turn
       draw_game
     end
 
     if (!@game)
-      
       if @input_menu
-        draw_game_result
+        # Draw Display text that display the result of the match
+        draw_match_result_text
+        # Draw Text input for players' name
         draw_textinput_menu
-        if @player1_field_empty
-          draw_display_text(FONT_SMALL, "Please enter name", 460, 135)
-        end
-        if @player2_field_empty
-          draw_display_text(FONT_SMALL, "Please enter name", 460, 235)
-        end
       else(!@input_menu)
         if (!@match_results_menu)
-          draw_game_result
+          # Draw Display text that display the result of the match
+          draw_match_result_text
+          # Draw endgame menu
           draw_endgame_menu
         else
-          draw_matches
-          @back_button.draw()
+          # Draw a menu displaying all the results of previous matches 
+          draw_match_results
         end
       end
     end
@@ -147,6 +152,7 @@ class TicTacToe < Gosu::Window
 
     if (!@game)
       if @input_menu
+        # Check mouse event on text input
         @player1_input.button_down(id)
         @player2_input.button_down(id)
         player1_name = @player1_input.text
@@ -155,18 +161,14 @@ class TicTacToe < Gosu::Window
         if @done_button.button_down(id)
           # Only allow to proceed when both input fields are filled
           if player1_name.length > 0 && player2_name.length > 0
-            if @winner == "O"
-              match_result = "#{player1_name}(win) vs #{player2_name}"
-            elsif @winner == "X"
-              match_result = "#{player1_name} vs #{player2_name}(win)"
-            else
-              match_result = "#{player1_name} vs #{player2_name} (tie)"
-            end
+            match_result = get_match_result(player1_name, player2_name)
+            # Insert the result (string) into the array
             @matchesarr << match_result
+            # Write the results in the array into the text file
             write_file
             @input_menu = false
           else
-            # Display msg telling the players to enter their name
+            # Display msg telling the players to enter their name if they leave the input field empty
             if player1_name.length <= 0
               @player1_field_empty = true
             else
@@ -233,13 +235,14 @@ class TicTacToe < Gosu::Window
   end
 
   # Display all previous match results
-  def draw_matches
+  def draw_match_results
     draw_display_text(FONT_LARGE, "Match History", 185, 50)
     y = 100
     for i in 0..@matchesarr.length - 1
       draw_display_text(FONT_SMALL, @matchesarr[i], 240, y)
       y += 20
     end
+    @back_button.draw()
   end
 
   def draw_game
@@ -249,7 +252,7 @@ class TicTacToe < Gosu::Window
     @game_board.draw()
   end
 
-  def draw_game_result
+  def draw_match_result_text
     if @winner == "X" or @winner == "O"
       # Display winner when the game ends and theres no tie
       draw_display_text(FONT_LARGE, @winner + " Wins!", @display_text_pos[0], @display_text_pos[1])
@@ -263,9 +266,17 @@ class TicTacToe < Gosu::Window
     # Draw text & text input for player 1
     draw_display_text(FONT_MEDIUM, "Player1's name (O):", 200, 100)
     @player1_input.draw()
+    # Only display when the input field is empty
+    if @player1_field_empty
+      draw_display_text(FONT_SMALL, "Please enter name", 460, 135)
+    end
     # Draw text & text input for player 2
     draw_display_text(FONT_MEDIUM, "Player2's name (X):", 200, 200)
     @player2_input.draw()
+    # Only display when the input field is empty
+    if @player2_field_empty
+      draw_display_text(FONT_SMALL, "Please enter name", 460, 235)
+    end
     # Done button
     @done_button.draw()
   end
@@ -278,6 +289,17 @@ class TicTacToe < Gosu::Window
     @exit_button.draw()
   end
   
+  def get_match_result(player1_name, player2_name)
+    if @winner == "O"
+      match_result = "#{player1_name}(win) vs #{player2_name}"
+    elsif @winner == "X"
+      match_result = "#{player1_name} vs #{player2_name}(win)"
+    else
+      match_result = "#{player1_name} vs #{player2_name} (tie)"
+    end
+    return match_result
+  end
+
   def handle_turn(player_turn, button)
     place_sign(player_turn,button)
     check_for_winner()
@@ -317,7 +339,6 @@ class TicTacToe < Gosu::Window
       @winner = horizontal_winner
     else
       if !(@game_board.board.include? "")
-        @winner = ""
         @game = false
       end
     end
@@ -398,6 +419,7 @@ class TicTacToe < Gosu::Window
     end
   end
 
+  # Restart game
   def restart_game
     @game_board.board = ["", "", "",
                          "", "", "",

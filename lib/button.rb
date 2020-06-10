@@ -7,11 +7,11 @@ class Button
     @button_y = button_y
     @button_width = button_width
     @button_height = button_height
+    @text_content = text_content
     @button_color = 0xFF1D4DB5
     @button_hover = 0xFF1D5DBA
     @button_zorder = ZOrder::BOTTOM
     @text = Gosu::Font.new(25)
-    @text_content = text_content
     @text_color = Gosu::Color::WHITE
     @text_zorder = ZOrder::MIDDLE
   end
@@ -25,8 +25,8 @@ class Button
                    @button_zorder)
 
     @text.draw_text(@text_content, 
-                    @button_x + (@button_width / 8), 
-                    @button_y + (@button_height / 4), 
+                    @button_x + ((@button_width / 2) - @text.text_width(@text_content, 1) / 2),
+                    @button_y + ((@button_height / 2) - (@text.height / 2)),
                     @text_zorder, 
                     1, 
                     1, 
