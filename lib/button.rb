@@ -8,7 +8,7 @@ class Button
     @button_width = button_width
     @button_height = button_height
     @text_content = text_content
-    @button_color = Cosu::Color.new(0xFF1D4DB5)
+    @button_color = Gosu::Color.new(0xFF1D4DB5)
     @button_hover = Gosu::Color.new(0xFF1D5DBA)
     @button_zorder = ZOrder::BOTTOM
     @text = Gosu::Font.new(25)
